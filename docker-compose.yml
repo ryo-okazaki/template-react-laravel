@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  nginx:
+    image: nginx:1.23.3
+    ports:
+      - "80:80"
+    volumes:
+      - ./laravel:/usr/share/nginx/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+  php-fpm:
+    build: ./docker/php-fpm
+    volumes:
+      - ./laravel:/var/www/html
+
+  composer:
+    image: composer:latest
+    volumes:
+      - ./:/app
+    entrypoint: composer
+
+  node:
+    build:
+      context: ./
+      dockerfile: ./docker/frontend/Dockerfile
+    ports:
+      - "8081:3000"
+    volumes:
+      - ./frontend:/app
+
+  mysql:
+    image: mysql:8.0.32
+    environment:
+      MYSQL_DATABASE: react_db
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: react_user
+      MYSQL_PASSWORD: password
+      TZ: Asia/Tokyo
+    ports:
+      - "33060:3306"
+    volumes:
+      - spa_data:/var/lib/mysql
+
+volumes:
+  spa_data:
+    driver: local
